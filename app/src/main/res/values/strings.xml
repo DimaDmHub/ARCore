@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ARCore</string>
+    <string name="welcome_screen_continue_btn_title">Continue</string>
 </resources>
