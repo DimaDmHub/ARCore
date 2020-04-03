@@ -20,7 +20,6 @@ import com.example.arcore.util.permission.CameraPermissionHelper
 import kotlinx.android.synthetic.main.images_list_fragment.*
 import java.io.File
 
-
 class ImagesListFragment : BaseFragment(R.layout.images_list_fragment),
     ImagesAdapter.OnItemClickListener {
 

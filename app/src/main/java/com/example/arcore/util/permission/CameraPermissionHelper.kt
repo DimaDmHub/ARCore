@@ -28,7 +28,7 @@ object CameraPermissionHelper {
 
                 override fun onPermissionDenied(response: PermissionDeniedResponse?) {
                     if (response?.isPermanentlyDenied == true) {
-                        showPermissionPermanentlyDeniedDialog(activity)
+                        showPermissionPermanentlyDeniedDialog(activity, cancelable)
                         return
                     }
                     showPermissionDeniedDialog(activity, cancelable, onGranted)
@@ -53,9 +53,9 @@ object CameraPermissionHelper {
             .show()
     }
 
-    private fun showPermissionPermanentlyDeniedDialog(activity: Activity) {
+    private fun showPermissionPermanentlyDeniedDialog(activity: Activity, cancelable: Boolean) {
         AlertDialog.Builder(activity)
-            .setCancelable(false)
+            .setCancelable(cancelable)
             .setTitle("Permission permanently denied")
             .setMessage("App need camera permission to continue, please go to settings and grant permission!")
             .setPositiveButton("Settings") { _, _ ->

@@ -96,15 +96,16 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         session: Session
     ): AugmentedImageDatabase {
         val db = AugmentedImageDatabase(session)
-        requireContext().contentResolver?.let { resolver ->
-            images.forEach { image ->
-                try {
-                    resolver.openFileDescriptor(image.image, "r")?.fileDescriptor?.let {
-                        db.addImage(image.name.toString(), BitmapFactory.decodeFileDescriptor(it))
-                    }
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
+        images.forEach { image ->
+            try {
+                db.addImage(
+                    image.name.toString(),
+                    BitmapFactory.decodeStream(
+                        requireContext().contentResolver.openInputStream(image.image)
+                    )
+                )
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
         return db
