@@ -3,6 +3,7 @@ package com.example.arcore.ui.main.fragment.camera
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -128,8 +129,8 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
                 ArCoreApk.InstallStatus.INSTALLED -> onInstalled.invoke()
                 else -> shouldRequestArCoreInstall = false
             }
-        } catch (e: UnavailableUserDeclinedInstallationException) {
-            e.printStackTrace()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error, device not supported!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -158,10 +159,5 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         } catch (e: Exception) {
             e.toString()
         }
-    }
-
-    companion object {
-
-        private const val TAG = "CameraFragment"
     }
 }
