@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.arcore.R
 import com.example.arcore.data.local.entity.ImageEntity
 import com.example.arcore.ui.core.BaseFragment
-import com.example.arcore.ui.main.fragment.ImagesViewModel
+import com.example.arcore.ui.main.fragment.viewmodel.ImagesViewModel
 import com.example.arcore.util.permission.CameraPermissionHelper
 import com.google.ar.core.*
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
@@ -24,11 +24,12 @@ import java.io.IOException
 
 class CameraFragment : BaseFragment(R.layout.camera_fragment) {
 
-    private val viewModel: ImagesViewModel by viewModels(factoryProducer = {
-        ViewModelProvider.AndroidViewModelFactory(
-            requireActivity().application
-        )
-    })
+    private val viewModel: ImagesViewModel by viewModels(
+        factoryProducer = {
+            ViewModelProvider.AndroidViewModelFactory(
+                requireActivity().application
+            )
+        })
 
     private var session: Session? = null
     private var shouldRequestArCoreInstall = true
@@ -40,6 +41,7 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
     override fun onResume() {
         super.onResume()
         CameraPermissionHelper.requestPermissionIfNeeded(requireActivity(), false) {
+            initCore()
             subscribeObservables()
         }
     }
@@ -65,31 +67,40 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
 
     private fun subscribeObservables() {
         viewModel.imagesData.observe(viewLifecycleOwner, Observer {
-            initCore(it)
+            session?.let { session ->
+                Thread {
+                    session.configure(createSessionConfig(session).apply {
+                        this.augmentedImageDatabase = createAugmentedDB(it, session)
+                    })
+                }.start()
+            }
         })
     }
 
     @SuppressLint("MissingPermission")
-    private fun initCore(images: List<ImageEntity>) {
+    private fun initCore() {
         if (session == null) {
             checkArCoreInstall {
-                session = Session(requireContext(), setOf(Session.Feature.SHARED_CAMERA)).apply {
-                    val config = createSessionConfig(this)
-                    config.augmentedImageDatabase = createAugmentedDB(images, this)
-                    this.configure(config)
-                }
-                arSceneCameraFragment.setupSession(session)
+                arSceneCameraFragment.setupSession(
+                    Session(
+                        requireContext(),
+                        setOf(Session.Feature.SHARED_CAMERA)
+                    ).apply {
+                        this.configure(createSessionConfig(this))
+                        session = this
+                    })
             }
         }
         arSceneCameraFragment?.session?.resume()
         arSceneCameraFragment?.resume()
     }
 
-    private fun createSessionConfig(session: Session) = Config(session).apply {
-        focusMode = Config.FocusMode.AUTO
-        updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-        lightEstimationMode = Config.LightEstimationMode.DISABLED
-    }
+    private fun createSessionConfig(session: Session) =
+        Config(session).apply {
+            focusMode = Config.FocusMode.AUTO
+            updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+            lightEstimationMode = Config.LightEstimationMode.DISABLED
+        }
 
     private fun createAugmentedDB(
         images: List<ImageEntity>,
@@ -147,5 +158,10 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         } catch (e: Exception) {
             e.toString()
         }
+    }
+
+    companion object {
+
+        private const val TAG = "CameraFragment"
     }
 }

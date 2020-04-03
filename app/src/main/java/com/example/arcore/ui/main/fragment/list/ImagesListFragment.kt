@@ -13,9 +13,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.arcore.R
 import com.example.arcore.data.local.entity.ImageEntity
 import com.example.arcore.ui.core.BaseFragment
-import com.example.arcore.ui.main.fragment.ImagesViewModel
 import com.example.arcore.ui.main.fragment.list.adapter.ImagesAdapter
 import com.example.arcore.ui.main.fragment.list.decoration.PaddingItemDecoration
+import com.example.arcore.ui.main.fragment.viewmodel.ImagesViewModel
 import com.example.arcore.util.permission.CameraPermissionHelper
 import kotlinx.android.synthetic.main.images_list_fragment.*
 import java.io.File
