@@ -1,4 +1,4 @@
-package com.example.arcore.ui.main.fragment.list
+package com.example.arcore.ui.main.fragment
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -12,7 +12,7 @@ import com.example.arcore.data.local.entity.ImageEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ImagesListViewModel constructor(application: Application) : AndroidViewModel(application) {
+class ImagesViewModel constructor(application: Application) : AndroidViewModel(application) {
 
     private val imagesDao: ImagesDao = Room.databaseBuilder(application, Database::class.java, NAME)
         .build()

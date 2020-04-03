@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/default_margin_padding"
         android:src="@drawable/ic_add_white_24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/fabListFragmentContinue"
         app:layout_constraintEnd_toEndOf="parent"
         app:menu_colorNormal="@android:color/black"
         app:menu_colorPressed="@android:color/black">
@@ -45,4 +45,15 @@
             app:fab_colorPressed="@android:color/black"
             app:fab_size="mini" />
     </com.github.clans.fab.FloatingActionMenu>
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/fabListFragmentContinue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin_padding"
+        android:src="@drawable/ic_arrow_forward_white_24dp"
+        app:fab_colorNormal="@android:color/black"
+        app:fab_colorPressed="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

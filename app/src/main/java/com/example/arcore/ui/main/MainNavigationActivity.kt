@@ -1,4 +1,4 @@
-package com.example.arcore.ui.main.fragment
+package com.example.arcore.ui.main
 
 interface MainNavigationActivity {
 

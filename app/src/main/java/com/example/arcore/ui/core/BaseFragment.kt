@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
-import com.example.arcore.ui.main.fragment.MainNavigationActivity
+import com.example.arcore.ui.main.MainNavigationActivity
 
 abstract class BaseFragment constructor(@LayoutRes id: Int) : Fragment(id) {
 

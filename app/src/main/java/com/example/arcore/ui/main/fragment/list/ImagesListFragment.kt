@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.arcore.R
 import com.example.arcore.data.local.entity.ImageEntity
 import com.example.arcore.ui.core.BaseFragment
+import com.example.arcore.ui.main.fragment.ImagesViewModel
 import com.example.arcore.ui.main.fragment.list.adapter.ImagesAdapter
 import com.example.arcore.ui.main.fragment.list.decoration.PaddingItemDecoration
 import com.example.arcore.util.permission.CameraPermissionHelper
@@ -23,7 +24,7 @@ import java.io.File
 class ImagesListFragment : BaseFragment(R.layout.images_list_fragment),
     ImagesAdapter.OnItemClickListener {
 
-    private val viewModel: ImagesListViewModel by viewModels(factoryProducer = {
+    private val viewModel: ImagesViewModel by viewModels(factoryProducer = {
         ViewModelProvider.AndroidViewModelFactory(
             requireActivity().application
         )
@@ -68,6 +69,9 @@ class ImagesListFragment : BaseFragment(R.layout.images_list_fragment),
         fabListFragmentAddCamera?.setOnClickListener {
             fabListFragmentAdd.close(false)
             handleImageFromCameraSelected()
+        }
+        fabListFragmentContinue?.setOnClickListener {
+            navigation.navigateToCamera()
         }
     }
 

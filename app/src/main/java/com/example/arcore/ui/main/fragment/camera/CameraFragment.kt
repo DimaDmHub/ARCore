@@ -1,12 +1,15 @@
 package com.example.arcore.ui.main.fragment.camera
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.arcore.R
+import com.example.arcore.data.local.entity.ImageEntity
 import com.example.arcore.ui.core.BaseFragment
+import com.example.arcore.ui.main.fragment.ImagesViewModel
 import com.example.arcore.util.permission.CameraPermissionHelper
 import com.google.ar.core.*
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
@@ -21,6 +24,12 @@ import java.io.IOException
 
 class CameraFragment : BaseFragment(R.layout.camera_fragment) {
 
+    private val viewModel: ImagesViewModel by viewModels(factoryProducer = {
+        ViewModelProvider.AndroidViewModelFactory(
+            requireActivity().application
+        )
+    })
+
     private var session: Session? = null
     private var shouldRequestArCoreInstall = true
 
@@ -31,17 +40,22 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
     override fun onResume() {
         super.onResume()
         CameraPermissionHelper.requestPermissionIfNeeded(requireActivity(), false) {
-            initCore()
+            subscribeObservables()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        arSceneCameraFragment?.session?.pause()
+        arSceneCameraFragment?.pause()
     }
 
     private fun initSceneView() {
         arSceneCameraFragment.scene.addOnUpdateListener {
-            val frame = arSceneCameraFragment.arFrame
-            val updatedAugmentedImages = frame!!.getUpdatedTrackables(AugmentedImage::class.java)
-            for (augmentedImage in updatedAugmentedImages) {
-                if (augmentedImage.trackingState == TrackingState.TRACKING) {
-                    if (augmentedImage.name == "Nature" || augmentedImage.name == "Flowers") {
+            arSceneCameraFragment.arFrame?.let {
+                val updatedAugmentedImages = it.getUpdatedTrackables(AugmentedImage::class.java)
+                for (augmentedImage in updatedAugmentedImages) {
+                    if (augmentedImage.trackingState == TrackingState.TRACKING) {
                         setLabel(augmentedImage)
                     }
                 }
@@ -49,17 +63,22 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         }
     }
 
+    private fun subscribeObservables() {
+        viewModel.imagesData.observe(viewLifecycleOwner, Observer {
+            initCore(it)
+        })
+    }
+
     @SuppressLint("MissingPermission")
-    private fun initCore() {
+    private fun initCore(images: List<ImageEntity>) {
         if (session == null) {
             checkArCoreInstall {
-                arSceneCameraFragment.setupSession(
-                    Session(
-                        requireContext(),
-                        setOf(Session.Feature.SHARED_CAMERA)
-                    ).apply {
-                        this.configure(createSessionConfig(this))
-                    })
+                session = Session(requireContext(), setOf(Session.Feature.SHARED_CAMERA)).apply {
+                    val config = createSessionConfig(this)
+                    config.augmentedImageDatabase = createAugmentedDB(images, this)
+                    this.configure(config)
+                }
+                arSceneCameraFragment.setupSession(session)
             }
         }
         arSceneCameraFragment?.session?.resume()
@@ -70,26 +89,25 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         focusMode = Config.FocusMode.AUTO
         updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
         lightEstimationMode = Config.LightEstimationMode.DISABLED
-        createAugmentedDB(this, session)
     }
 
-    private fun createAugmentedDB(config: Config, session: Session) {
-        val nature = loadAugmentedImage("test.jpg")
-        val flowers = loadAugmentedImage("test2.jpg")
-        val augmentedImageDatabase = AugmentedImageDatabase(session)
-        augmentedImageDatabase.addImage("Nature", nature)
-        augmentedImageDatabase.addImage("Flowers", flowers)
-        config.augmentedImageDatabase = augmentedImageDatabase
-    }
-
-    // TODO refactor
-    private fun loadAugmentedImage(name: String): Bitmap? = try {
-        requireActivity().assets.open(name).use { `is` ->
-            BitmapFactory.decodeStream(`is`)
+    private fun createAugmentedDB(
+        images: List<ImageEntity>,
+        session: Session
+    ): AugmentedImageDatabase {
+        val db = AugmentedImageDatabase(session)
+        requireContext().contentResolver?.let { resolver ->
+            images.forEach { image ->
+                try {
+                    resolver.openFileDescriptor(image.image, "r")?.fileDescriptor?.let {
+                        db.addImage(image.name.toString(), BitmapFactory.decodeFileDescriptor(it))
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
         }
-    } catch (e: IOException) {
-        Log.e("Error", "IO exception loading augmented image bitmap.", e)
-        null
+        return db
     }
 
     private fun checkArCoreInstall(onInstalled: () -> Unit) {
@@ -99,11 +117,10 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
                 else -> shouldRequestArCoreInstall = false
             }
         } catch (e: UnavailableUserDeclinedInstallationException) {
-            // TODO handle (Show dialog with message)
+            e.printStackTrace()
         }
     }
 
-    @SuppressLint("NewApi")
     private fun setLabel(augmentedImage: AugmentedImage) {
         try {
             ViewRenderable.builder()
