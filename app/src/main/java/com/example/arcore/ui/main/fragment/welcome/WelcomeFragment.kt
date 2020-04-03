@@ -1,7 +1,6 @@
 package com.example.arcore.ui.main.fragment.welcome
 
 import android.os.Bundle
-import android.widget.Toast
 import com.example.arcore.R
 import com.example.arcore.ui.core.BaseFragment
 import com.example.arcore.util.extension.addAnimationEndListener
@@ -18,17 +17,17 @@ class WelcomeFragment : BaseFragment(R.layout.welcome_fragment) {
         lavWelcomeFragmentAnimationView?.setMinAndMaxProgress(0.0f, MAX_ANIMATION_VIEW_PROGRESS)
         lavWelcomeFragmentAnimationView?.addAnimatorUpdateListener {
             with(it.animatedValue as Float) {
-                mbWelcomeFragmentContinue.alpha = (1f / MAX_ANIMATION_VIEW_PROGRESS) * this
+                mbWelcomeFragmentContinue?.alpha = (1f / MAX_ANIMATION_VIEW_PROGRESS) * this
             }
         }
         lavWelcomeFragmentAnimationView?.addAnimationEndListener {
-            mbWelcomeFragmentContinue.isEnabled = true
+            mbWelcomeFragmentContinue?.isEnabled = true
         }
     }
 
     private fun initContinueButton() {
         mbWelcomeFragmentContinue?.setOnClickListener {
-            Toast.makeText(requireContext(), "Test", Toast.LENGTH_SHORT).show()
+            navigation.navigateToImagesList()
         }
     }
 

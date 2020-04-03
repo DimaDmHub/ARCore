@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">ARCore</string>
+
     <string name="welcome_screen_continue_btn_title">Continue</string>
+
+    <string name="image_list_screen_save_btn_title">Save</string>
+    <string name="image_list_screen_delete_btn_title">Delete</string>
 </resources>

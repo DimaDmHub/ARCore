@@ -1,18 +1,13 @@
 package com.example.arcore.ui.main.fragment.camera
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import com.example.arcore.R
 import com.example.arcore.ui.core.BaseFragment
-import com.example.arcore.util.extension.isPermissionGranted
+import com.example.arcore.util.permission.CameraPermissionHelper
 import com.google.ar.core.*
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 import com.google.ar.sceneform.AnchorNode
@@ -20,15 +15,10 @@ import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ViewRenderable
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.single.BasePermissionListener
 import kotlinx.android.synthetic.main.camera_fragment.*
 import kotlinx.android.synthetic.main.lable_view.view.*
 import java.io.IOException
 
-// TODO move text to string res
 class CameraFragment : BaseFragment(R.layout.camera_fragment) {
 
     private var session: Session? = null
@@ -40,11 +30,9 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
 
     override fun onResume() {
         super.onResume()
-        if (requireContext().isPermissionGranted(CAMERA_PERMISSION)) {
+        CameraPermissionHelper.requestPermissionIfNeeded(requireActivity(), false) {
             initCore()
-            return
         }
-        requestPermissions()
     }
 
     private fun initSceneView() {
@@ -141,62 +129,5 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         } catch (e: Exception) {
             e.toString()
         }
-    }
-
-    private fun requestPermissions() {
-        Dexter.withActivity(requireActivity())
-            .withPermission(CAMERA_PERMISSION)
-            .withListener(object : BasePermissionListener() {
-
-                override fun onPermissionGranted(response: PermissionGrantedResponse?) {
-                    initCore()
-                }
-
-                override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                    if (response?.isPermanentlyDenied == true) {
-                        showPermissionPermanentlyDeniedDialog()
-                        return
-                    }
-                    showPermissionDeniedDialog()
-                }
-            })
-            .onSameThread()
-            .check()
-    }
-
-    private fun showPermissionDeniedDialog() {
-        AlertDialog.Builder(requireContext())
-            .setCancelable(false)
-            .setTitle("Permission denied")
-            .setMessage("App need camera permission to continue!")
-            .setPositiveButton("Ok") { _, _ ->
-                requestPermissions()
-            }
-            .show()
-    }
-
-    private fun showPermissionPermanentlyDeniedDialog() {
-        AlertDialog.Builder(requireContext())
-            .setCancelable(false)
-            .setTitle("Permission permanently denied")
-            .setMessage("App need camera permission to continue, please go to settings and grant permission!")
-            .setPositiveButton("Settings") { _, _ ->
-                openAppSystemSettings()
-            }
-            .show()
-    }
-
-    private fun openAppSystemSettings() {
-        startActivity(Intent().apply {
-            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            data = Uri.fromParts(PACKAGE, requireContext().packageName, null)
-        })
-    }
-
-    companion object {
-
-        private const val CAMERA_PERMISSION = Manifest.permission.CAMERA
-        private const val PACKAGE = "package"
-
     }
 }

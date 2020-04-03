@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivImageItem"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="w,1:1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@android:color/black" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilImageItem"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_margin_padding"
+        android:layout_marginTop="@dimen/default_margin_padding"
+        android:layout_marginEnd="@dimen/default_margin_padding"
+        app:errorEnabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivImageItem"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tielImageItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:lines="@integer/single_line"
+            android:maxLength="@integer/images_name_max_length"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textSize="18sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/mbImageItemSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_margin_padding"
+        android:layout_marginBottom="@dimen/default_margin_padding"
+        android:src="@drawable/ic_save_white_24dp"
+        android:text="@string/image_list_screen_save_btn_title"
+        android:tint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/tilImageItem"
+        app:layout_constraintTop_toBottomOf="@+id/tilImageItem" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/mbImageItemDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_margin_padding"
+        android:layout_marginEnd="@dimen/default_margin_padding"
+        android:layout_marginBottom="@dimen/default_margin_padding"
+        android:src="@drawable/ic_delete_white_24dp"
+        android:text="@string/image_list_screen_delete_btn_title"
+        android:tint="@color/colorPrimaryDark"
+        app:backgroundTint="@android:color/darker_gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/mbImageItemSave"
+        app:layout_constraintTop_toBottomOf="@+id/tilImageItem" />
+</androidx.constraintlayout.widget.ConstraintLayout>
