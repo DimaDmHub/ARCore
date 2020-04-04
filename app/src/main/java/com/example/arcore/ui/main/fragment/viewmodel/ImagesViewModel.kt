@@ -18,7 +18,7 @@ class ImagesViewModel constructor(application: Application) : AndroidViewModel(a
         .build()
         .getImagesDao()
 
-    val imagesData: LiveData<List<ImageEntity>> get() = imagesDao.getImages()
+    val imagesData: LiveData<List<ImageEntity>> = imagesDao.getImages()
 
     fun addImage(image: ImageEntity) {
         viewModelScope.launch(Dispatchers.IO) {

@@ -70,7 +70,7 @@ class ImagesListFragment : BaseFragment(R.layout.images_list_fragment),
             handleImageFromCameraSelected()
         }
         fabListFragmentContinue?.setOnClickListener {
-            navigation.navigateToCamera()
+            navigation.navigateToCamera(ArrayList(viewModel.imagesData.value ?: emptyList()))
         }
     }
 
