@@ -1,19 +1,13 @@
 package com.example.arcore.ui.main.fragment.camera
 
-import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Toast
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.arcore.R
 import com.example.arcore.data.local.entity.ImageEntity
 import com.example.arcore.ui.core.BaseFragment
-import com.example.arcore.ui.main.fragment.viewmodel.ImagesViewModel
 import com.example.arcore.util.permission.CameraPermissionHelper
 import com.google.ar.core.*
-import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
@@ -21,16 +15,8 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ViewRenderable
 import kotlinx.android.synthetic.main.camera_fragment.*
 import kotlinx.android.synthetic.main.lable_view.view.*
-import java.io.IOException
 
 class CameraFragment : BaseFragment(R.layout.camera_fragment) {
-
-    private val viewModel: ImagesViewModel by viewModels(
-        factoryProducer = {
-            ViewModelProvider.AndroidViewModelFactory(
-                requireActivity().application
-            )
-        })
 
     private var session: Session? = null
     private var shouldRequestArCoreInstall = true
@@ -43,7 +29,6 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         super.onResume()
         CameraPermissionHelper.requestPermissionIfNeeded(requireActivity(), false) {
             initCore()
-            subscribeObservables()
         }
     }
 
@@ -66,19 +51,6 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
         }
     }
 
-    private fun subscribeObservables() {
-        viewModel.imagesData.observe(viewLifecycleOwner, Observer {
-            session?.let { session ->
-                Thread {
-                    session.configure(createSessionConfig(session).apply {
-                        this.augmentedImageDatabase = createAugmentedDB(it, session)
-                    })
-                }.start()
-            }
-        })
-    }
-
-    @SuppressLint("MissingPermission")
     private fun initCore() {
         if (session == null) {
             checkArCoreInstall {
@@ -101,24 +73,19 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
             focusMode = Config.FocusMode.AUTO
             updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
             lightEstimationMode = Config.LightEstimationMode.DISABLED
+            augmentedImageDatabase = createAugmentedDB(session)
         }
 
-    private fun createAugmentedDB(
-        images: List<ImageEntity>,
-        session: Session
-    ): AugmentedImageDatabase {
+    private fun createAugmentedDB(session: Session): AugmentedImageDatabase {
+        val images: ArrayList<ImageEntity> = arguments?.getParcelableArrayList(KEY_BUNDLE_IMAGES)
+            ?: throw IllegalArgumentException("Images should not be null")
         val db = AugmentedImageDatabase(session)
         images.forEach { image ->
-            try {
-                db.addImage(
-                    image.name.toString(),
-                    BitmapFactory.decodeStream(
-                        requireContext().contentResolver.openInputStream(image.image)
-                    )
+            db.addImage(
+                image.name.toString(), BitmapFactory.decodeStream(
+                    requireContext().contentResolver.openInputStream(image.image)
                 )
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+            )
         }
         return db
     }
@@ -130,7 +97,7 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
                 else -> shouldRequestArCoreInstall = false
             }
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Error, device not supported!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -158,6 +125,17 @@ class CameraFragment : BaseFragment(R.layout.camera_fragment) {
                 }
         } catch (e: Exception) {
             e.toString()
+        }
+    }
+
+    companion object {
+
+        private const val KEY_BUNDLE_IMAGES = "key_bundle_images"
+
+        fun newInstance(images: ArrayList<ImageEntity>) = CameraFragment().apply {
+            this.arguments = Bundle().apply {
+                putParcelableArrayList(KEY_BUNDLE_IMAGES, images)
+            }
         }
     }
 }

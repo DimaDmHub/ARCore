@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import com.example.arcore.R
+import com.example.arcore.data.local.entity.ImageEntity
 import com.example.arcore.ui.main.fragment.camera.CameraFragment
 import com.example.arcore.ui.main.fragment.list.ImagesListFragment
 import com.example.arcore.ui.main.fragment.welcome.WelcomeFragment
@@ -22,10 +23,10 @@ class MainActivity : AppCompatActivity(), MainNavigationActivity {
         }
     }
 
-    override fun navigateToCamera() {
+    override fun navigateToCamera(images: ArrayList<ImageEntity>) {
         supportFragmentManager.commit {
             addToBackStack(null)
-            replace(R.id.fcvMainActivity, CameraFragment())
+            replace(R.id.fcvMainActivity, CameraFragment.newInstance(images))
         }
     }
 
